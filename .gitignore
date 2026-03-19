@@ -1,3 +1,6 @@
 
 __pycache__/
 .pytest_cache/
+.env
+init-sql/
+postgres-data/

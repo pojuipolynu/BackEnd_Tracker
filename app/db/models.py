@@ -21,7 +21,7 @@ class BaseId(Base):
 
 class User(BaseId):
     __tablename__ = "users"
-    name: Mapped[str] = mapped_column(String, nullable=False)
+    username: Mapped[str] = mapped_column(String, unique=True, nullable=False)
     email: Mapped[str] = mapped_column(String, unique=True, nullable=False)
     hashed_password: Mapped[str] = mapped_column(String, nullable=False)
 
@@ -31,24 +31,15 @@ class User(BaseId):
     friends: Mapped[list["Friend"]] = relationship("Friend", foreign_keys="[Friend.user_1_id]", back_populates="user_1")
     requests: Mapped[list["Request"]] = relationship("Request", foreign_keys="[Request.creator_id]", back_populates="creator")
 
-class Level(BaseId):
-    __tablename__ = "levels"
-    name: Mapped[str] = mapped_column(String, unique=True, nullable=False)
-    points: Mapped[int] = mapped_column(Integer, nullable=False)
-    rooms: Mapped[list["Room"]] = relationship("Room", back_populates="level")
-
 class Room(BaseId):
     __tablename__ = "rooms"
     name: Mapped[str] = mapped_column(String(100), nullable=False)
-    description: Mapped[str] = mapped_column(Text, nullable=True)  
     creation_status: Mapped[InviteStatus] = mapped_column(SQLAlchemyEnum(InviteStatus), default=InviteStatus.PENDING, nullable=False)
     room_status: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     
-    level_id: Mapped[UUID] = mapped_column(ForeignKey('levels.id'), nullable=False)
     creator_id: Mapped[UUID] = mapped_column(ForeignKey('users.id'), nullable=False)
     visitor_id: Mapped[UUID] = mapped_column(ForeignKey('users.id'), nullable=False)
 
-    level: Mapped["Level"] = relationship("Level", back_populates="rooms")
     creator: Mapped["User"] = relationship("User", foreign_keys=[creator_id], back_populates="rooms_created")
     visitor: Mapped["User"] = relationship("User", foreign_keys=[visitor_id], back_populates="rooms_visiting")
 

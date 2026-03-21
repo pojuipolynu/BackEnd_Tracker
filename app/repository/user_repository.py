@@ -17,6 +17,46 @@ class UserRepository(BaseRepository):
             return
         return user
     
-    async def get_user_friends(self, user_id: UUID):
-        result = await self.db.execute(select(self.model).join(self.friend_model, or_((self.friend_model.user_1_id == user_id) & (self.model.id == self.friend_model.user_2_id),(self.friend_model.user_2_id == user_id) & (self.model.id == self.friend_model.user_1_id))))
+    async def get_user_by_username(self, user_value: str):
+        result = await self.db.execute(select(self.model).filter(self.model.username == user_value))
+        user = result.scalars().first()
+        if user is None:
+            return
+        return user
+    
+    async def get_user_friends(self, user_id: UUID, offset: int, limit: int):
+        query = (
+            select(self.model)
+            .join(
+                self.friend_model, 
+                or_(
+                    (self.friend_model.user_1_id == user_id) & (self.model.id == self.friend_model.user_2_id),
+                    (self.friend_model.user_2_id == user_id) & (self.model.id == self.friend_model.user_1_id)
+                )
+            )
+        )
+        if limit == 0:
+            result = await self.db.execute(query.offset(offset))
+        else:
+            result = await self.db.execute(query.offset(offset).limit(limit))
+        return result.scalars().all()
+    
+    async def get_user_friends_username(self, user_id: UUID, username_key: str):
+        query = (
+            select(self.model)
+            .join(
+                self.friend_model,
+                or_(
+                    (self.friend_model.user_1_id == user_id) & (self.model.id == self.friend_model.user_2_id),
+                    (self.friend_model.user_2_id == user_id) & (self.model.id == self.friend_model.user_1_id)
+                )
+            )
+            .where(self.model.username.ilike(f"%{username_key}%"))
+        )
+
+        result = await self.db.execute(query)
+        return result.scalars().all()
+    
+    async def get_users_username(self, username_key: str):
+        result = await self.db.execute(select(self.model).where(self.model.username.ilike(f"%{username_key}%")))
         return result.scalars().all()

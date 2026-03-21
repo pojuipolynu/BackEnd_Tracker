@@ -1,5 +1,7 @@
 from fastapi import APIRouter, Depends, status
 from schemas.user_schema import UserCreate, SignInRequest, Token, Users, User, UserUpdateRequest
+from schemas.request_schema import Requests, Request
+from schemas.base_schema import BaseSchema
 from uuid import UUID
 from services.authorization_service import AuthorizationService
 from db.enum_variables import InviteStatus
@@ -28,15 +30,13 @@ async def delete_user_me(user_service: AuthorizationService = Depends(get_author
     await user_service.delete_user(current_user.id)
     return {"message": "User deleted successfully"}
 
-# NO PAGINATION
-@router.get("/user/me/friends", status_code=status.HTTP_200_OK)
-async def get_user_friends(user_service: AuthorizationService = Depends(get_authorization_service), current_user=Depends(AuthorizationService.get_current_user)):
-    return await user_service.get_user_friends(current_user.id)
-# NO PAGINATION
+@router.get("/user/me/friends", response_model=Users, status_code=status.HTTP_200_OK)
+async def get_user_friends(user_service: AuthorizationService = Depends(get_authorization_service), current_user=Depends(AuthorizationService.get_current_user), offset: int = 0, limit: int = 100):
+    return await user_service.get_user_friends(current_user.id, offset, limit)
 
-@router.get("/user/me/requests", status_code=status.HTTP_200_OK)
-async def get_user_requests(user_service: AuthorizationService = Depends(get_authorization_service), current_user=Depends(AuthorizationService.get_current_user), offset: int = 0, limit: int = 100):
-    return await user_service.get_requests(current_user.id, offset, limit)
+@router.get("/user/me/friends/{user_username}", response_model=Users, status_code=status.HTTP_200_OK)
+async def get_friends_by_username(user_username:str, user_service: AuthorizationService = Depends(get_authorization_service), current_user=Depends(AuthorizationService.get_current_user)):
+    return await user_service.get_friends_by_username(current_user.id, user_username)
 
 @router.get("/user/me/check_person/{user_id}", response_model=User, status_code=status.HTTP_200_OK)
 async def get_user_by_id(user_id: UUID, user_service: AuthorizationService = Depends(get_authorization_service), current_user=Depends(AuthorizationService.get_current_user)):
@@ -46,14 +46,22 @@ async def get_user_by_id(user_id: UUID, user_service: AuthorizationService = Dep
 async def get_all_users(user_service: AuthorizationService = Depends(get_authorization_service), current_user=Depends(AuthorizationService.get_current_user), offset: int = 0, limit: int = 100):
     return await user_service.get_users(offset, limit)
 
-@router.post("/user/me/send_request/{user_id}", status_code=status.HTTP_201_CREATED)
+@router.get("/user/me/check_all_people/{user_username}", response_model=Users, status_code=status.HTTP_200_OK)
+async def get_users_by_username(user_username: str, user_service: AuthorizationService = Depends(get_authorization_service), current_user=Depends(AuthorizationService.get_current_user)):
+    return await user_service.get_users_by_username(user_username)
+
+@router.get("/user/me/requests", response_model=Requests, status_code=status.HTTP_200_OK)
+async def get_user_requests(user_service: AuthorizationService = Depends(get_authorization_service), current_user=Depends(AuthorizationService.get_current_user), offset: int = 0, limit: int = 100):
+    return await user_service.get_requests(current_user.id, offset, limit)
+
+@router.post("/user/me/send_request/{user_id}", response_model=Request, status_code=status.HTTP_201_CREATED)
 async def send_request(user_id: UUID, user_service: AuthorizationService = Depends(get_authorization_service), current_user=Depends(AuthorizationService.get_current_user)):
     return await user_service.create_request(current_user.id, user_id)
 
-@router.patch("/user/me/accept_request/{request_id}", status_code=status.HTTP_201_CREATED)
+@router.patch("/user/me/accept_request/{request_id}", response_model=BaseSchema, status_code=status.HTTP_201_CREATED)
 async def accept_request(request_id: UUID, user_service: AuthorizationService = Depends(get_authorization_service), current_user=Depends(AuthorizationService.get_current_user)):
     return await user_service.update_request(current_user.id, request_id, InviteStatus.ACCEPTED)
 
-@router.patch("/user/me/decline_request/{request_id}", status_code=status.HTTP_201_CREATED)
+@router.patch("/user/me/decline_request/{request_id}", response_model=BaseSchema, status_code=status.HTTP_201_CREATED)
 async def decline_request(request_id: UUID, user_service: AuthorizationService = Depends(get_authorization_service), current_user=Depends(AuthorizationService.get_current_user)):
     return await user_service.update_request(current_user.id, request_id, InviteStatus.DECLINED)

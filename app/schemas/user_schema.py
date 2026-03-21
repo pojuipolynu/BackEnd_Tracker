@@ -4,7 +4,7 @@ from uuid import UUID
 
 class UserBase(BaseModel):
     email: str
-    name: str
+    username: str
 
 class UserCreate(UserBase):
     password: str
@@ -26,7 +26,7 @@ class SignUpRequest(UserCreate):
     pass
 
 class UserUpdateRequest(BaseModel):
-    name: str | None = None
+    username: str | None = None
     hashed_password: str | None = None
 
 class UserDetail(BaseModel):
@@ -35,4 +35,3 @@ class UserDetail(BaseModel):
 
 class Users(BaseModel):
     users: list[User]
-    total: int

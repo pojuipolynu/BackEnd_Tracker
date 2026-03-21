@@ -1,7 +1,7 @@
 from repository.base_repository import BaseRepository
 from db.models import Room
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, or_
+from sqlalchemy import select, or_, func
 from uuid import UUID
 from db.enum_variables import InviteStatus
 
@@ -24,3 +24,20 @@ class RoomRepository(BaseRepository):
             result = await self.db.execute(select(self.model).filter(or_(self.model.visitor_id==user_id, self.model.creator_id==user_id)).offset(offset).limit(limit))
         variables = result.scalars().all()
         return variables
+    
+    async def get_user_rooms_count(self, user_id: UUID) -> int:
+        query = (
+            select(func.count())
+            .select_from(self.model)
+            .filter(
+                or_(
+                    self.model.visitor_id == user_id, 
+                    self.model.creator_id == user_id
+                ),
+                self.model.creation_status == InviteStatus.ACCEPTED,
+                self.model.room_status == True
+            )
+        )
+        
+        result = await self.db.execute(query)
+        return result.scalar_one()

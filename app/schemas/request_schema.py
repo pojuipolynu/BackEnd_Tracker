@@ -8,12 +8,13 @@ class RequestBase(BaseModel):
 
 class Request(RequestBase):
     id: UUID
+    status: InviteStatus
     class Config:
         orm_mode = True
         from_attributes = True
 
 class RequestUpdateRequest(BaseModel):
     status: InviteStatus
-
-class RequestDetail(BaseModel):
-    request: Request
+    
+class Requests(BaseModel):
+    requests: list[Request]

@@ -32,7 +32,11 @@ class UserService:
 
     async def get_users(self, offset: int = 0, limit: int = 100):
         users = await self.user_repository.get_all(offset, limit)
-        return {"users": list(users), "total": await self.user_repository.count_all()}
+        return {"users": list(users)}
+    
+    async def get_users_by_username(self, username_key: str):
+        users = await self.user_repository.get_users_username(username_key)
+        return {"users": list(users)}
 
     async def get_user_by_id(self, user_id: UUID):
         user = await self.user_repository.get_one(user_id)
@@ -42,6 +46,10 @@ class UserService:
     
     async def get_user_by_email(self, user_email: str):
         user = await self.user_repository.get_user_by_email(user_email)
+        return user
+
+    async def get_user_by_username(self, user_username: str):
+        user = await self.user_repository.get_user_by_username(user_username)
         return user
     
     async def checking_user(self, user: SignInRequest):
@@ -56,13 +64,16 @@ class UserService:
         if user_create is None:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Data wasn`t given")
 
-        user_check = await self.get_user_by_email(user_create.email)
+        user_email_check = await self.get_user_by_email(user_create.email)
+        user_username_check = await self.get_user_by_username(user_create.username)
 
-        if user_check:
+        if user_email_check:
             raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Email should be unique")
+        elif user_username_check:
+            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Username should be unique")
         
         hashed_password = self.hash_password(user_create.password)
-        db_user = User(name = user_create.name, email=user_create.email, hashed_password=hashed_password)
+        db_user = User(username = user_create.username, email=user_create.email, hashed_password=hashed_password)
         created_user = await self.user_repository.create(db_user)
         
         return created_user
@@ -71,6 +82,12 @@ class UserService:
         user = await self.user_repository.get_one(user_id)
         if user is None:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+        
+        if user_update.username:
+            user_username_check = await self.get_user_by_username(user_update.username)
+            if user_username_check:
+                raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Username should be unique")
+            
         if user_update.hashed_password:
             user_update.hashed_password = self.hash_password(user_update.hashed_password)
 
@@ -83,8 +100,12 @@ class UserService:
         
         await self.user_repository.delete(user)
 
-    async def get_user_friends(self, user_id: UUID):
-        users = await self.user_repository.get_user_friends(user_id)
+    async def get_user_friends(self, user_id: UUID, offset: int = 0, limit: int = 100):
+        users = await self.user_repository.get_user_friends(user_id, offset, limit)
+        return {"users": list(users)}
+    
+    async def get_friends_by_username(self, user_id: UUID, username_key: str):
+        users = await self.user_repository.get_user_friends_username(user_id, username_key)
         return {"users": list(users)}
     
     async def check_request(self, creator_id: UUID, user_id: UUID):
@@ -103,23 +124,6 @@ class UserService:
 
         return created_request
     
-    async def update_request(self, user_id:UUID, request_id: UUID, request_status: RequestUpdateRequest):
-        request = await self.request_repository.get_one(request_id)
-        if request is None:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Request not found")
-        
-        if request.user_id != user_id:
-            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="User has no rights")
-
-        if request_status == InviteStatus.ACCEPTED:
-            new_friend = await self.friend_repository.create(Friend(user_1_id=request.creator_id, user_2_id=request.user_id))
-            await self.request_repository.delete(request)
-            return new_friend
-        else:
-            await self.request_repository.update(request, request_status)
-
-        return
-    
     async def get_requests(self, user_id: UUID, offset: int = 0, limit: int = 100):
         requests = await self.request_repository.get_user_requests(user_id, offset, limit)
         return {"requests": list(requests)}
@@ -129,3 +133,18 @@ class UserService:
         if request is None:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Request not found")
         return request
+    
+    async def update_request(self, user_id:UUID, request_id: UUID, request_status: InviteStatus):
+        request = await self.request_repository.get_one(request_id)
+        if request is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Request not found")
+        
+        if request.user_id != user_id:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="User has no rights")
+
+        if request_status == InviteStatus.ACCEPTED:
+            await self.request_repository.delete(request)
+        else:
+            await self.request_repository.update(request, RequestUpdateRequest(**{"status": request_status}))
+
+        return {"message": "Request updated"}

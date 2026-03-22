@@ -78,7 +78,9 @@ async def update_pet_name(pet_id: UUID, pet_data: PetUpdateRequest, room_service
 async def get_habbits(room_id: UUID, room_service: RoomService = Depends(get_room_service), current_user=Depends(AuthorizationService.get_current_user)):
     return await room_service.get_habbits_by_room(room_id, current_user.id)
 
-
+"""
+РУТИ ФУНКЦІОНАЛУ ТАСОК СЕЛЕРІ ДЛЯ ПЕРЕВІРКИ РОБОТИ ФУНКЦІЙ
+"""
 @router.get("/reduce_hp", status_code=status.HTTP_201_CREATED)
 async def test_reduce_hp(room_service: RoomService = Depends(get_room_service), current_user=Depends(AuthorizationService.get_current_user)):
     return await room_service.apply_daily_pet_reduce()
@@ -86,3 +88,6 @@ async def test_reduce_hp(room_service: RoomService = Depends(get_room_service), 
 @router.get("/clean_progress", status_code=status.HTTP_201_CREATED)
 async def test_clean_progress(room_service: RoomService = Depends(get_room_service), current_user=Depends(AuthorizationService.get_current_user)):
     return await room_service.reset_weekly_progress()
+"""
+РУТИ ФУНКЦІОНАЛУ ТАСОК СЕЛЕРІ ДЛЯ ПЕРЕВІРКИ РОБОТИ ФУНКЦІЙ
+"""

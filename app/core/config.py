@@ -12,6 +12,8 @@ class AppConfig(BaseSettings):
     DB_NAME: str
     JWT_SECRET: str
     JWT_ALGORITHM: str
+    REDIS_HOST: str
+    REDIS_PORT: int
     model_config = SettingsConfigDict(env_file=".env", env_prefix='APP_')
     @property
     def POSTGRES_URL(self):

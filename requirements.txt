@@ -8,3 +8,5 @@ authlib
 PyJWT
 bcrypt
 requests
+redis
+celery

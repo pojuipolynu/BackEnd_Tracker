@@ -1,5 +1,13 @@
 version: '3.8'
 services:
+  redis:
+    image: redis:latest
+    restart: always
+    container_name: redis_container
+    ports:
+      - '${APP_REDIS_PORT}:${APP_REDIS_PORT}'
+    volumes:
+      - .:/data/redis
   postgres:
     image: postgres:15-alpine
     restart: always
@@ -25,3 +33,4 @@ services:
       - .env
     depends_on:
       - postgres
+      - redis

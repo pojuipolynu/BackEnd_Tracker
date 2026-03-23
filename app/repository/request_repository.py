@@ -3,7 +3,7 @@ from db.models import Request
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, or_
 from uuid import UUID
-from  db.enum_variables import InviteStatus
+from db.enum_variables import InviteStatus
 
 class RequestRepository(BaseRepository):
     def __init__(self, db: AsyncSession):

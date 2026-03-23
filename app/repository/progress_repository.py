@@ -1,7 +1,7 @@
 from repository.base_repository import BaseRepository
 from db.models import Progress, Point, Habbit, Room
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, or_, and_, delete
+from sqlalchemy import select, and_, delete
 from uuid import UUID
 
 class ProgressRepository(BaseRepository):

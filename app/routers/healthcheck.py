@@ -1,4 +1,4 @@
-from  services.redis_service import redis_client
+from services.redis_service import redis_client
 from fastapi import APIRouter
 
 router = APIRouter(prefix="/healthcheck")

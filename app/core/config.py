@@ -14,9 +14,13 @@ class AppConfig(BaseSettings):
     JWT_ALGORITHM: str
     REDIS_HOST: str
     REDIS_PORT: int
+    DEV_PASSWORD: str
     model_config = SettingsConfigDict(env_file=".env", env_prefix='APP_')
     @property
     def POSTGRES_URL(self):
         return f"postgresql+asyncpg://{self.DB_USER}:{self.DB_PASSWORD}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
+    @property
+    def DEVELOPER_PASSWORD(self):
+        return self.DEV_PASSWORD
 
 settings = AppConfig()

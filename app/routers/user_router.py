@@ -44,7 +44,7 @@ async def get_user_by_id(user_id: UUID, user_service: AuthorizationService = Dep
 
 @router.get("/user/me/check_all_people", response_model=Users, status_code=status.HTTP_200_OK)
 async def get_all_users(user_service: AuthorizationService = Depends(get_authorization_service), current_user=Depends(AuthorizationService.get_current_user), offset: int = 0, limit: int = 100):
-    return await user_service.get_users(offset, limit)
+    return await user_service.get_users(current_user.id, offset, limit)
 
 @router.get("/user/me/check_all_people/{user_username}", response_model=Users, status_code=status.HTTP_200_OK)
 async def get_users_by_username(user_username: str, user_service: AuthorizationService = Depends(get_authorization_service), current_user=Depends(AuthorizationService.get_current_user)):

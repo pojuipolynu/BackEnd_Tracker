@@ -1,6 +1,6 @@
 import redis.asyncio as asyncredis
 from typing import TypeVar
-from  core.config import settings
+from core.config import settings
 
 KeyT = TypeVar('KeyT')
 

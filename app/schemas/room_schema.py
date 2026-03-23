@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 from uuid import UUID
-from  db.enum_variables import InviteStatus
+from db.enum_variables import InviteStatus
 
 class RoomBase(BaseModel):
     name: str

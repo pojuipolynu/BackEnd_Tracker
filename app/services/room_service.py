@@ -1,16 +1,16 @@
-from  db.models import Room, Pet, Progress
-from  schemas.room_schema import RoomBase, RoomUpdateRequest, RoomUpdateStatus
-from  schemas.pet_schema import PetBase, PetUpdateRequest, PetUpdateStatus
-from  schemas.habbit_schema import HabbitBase
-from  repository.room_repository import RoomRepository
-from  repository.pet_repository import PetRepository
-from  repository.habbit_repository import HabbitRepository
-from  repository.progress_repository import ProgressRepository
-from  repository.point_repository import PointRepository
+from db.models import Room, Pet, Progress
+from schemas.room_schema import RoomBase, RoomUpdateRequest, RoomUpdateStatus
+from schemas.pet_schema import PetBase, PetUpdateRequest, PetUpdateStatus
+from schemas.habbit_schema import HabbitBase
+from repository.room_repository import RoomRepository
+from repository.pet_repository import PetRepository
+from repository.habbit_repository import HabbitRepository
+from repository.progress_repository import ProgressRepository
+from repository.point_repository import PointRepository
 from uuid import UUID
 from fastapi import HTTPException, status
 from sqlalchemy.exc import IntegrityError
-from  db.enum_variables import InviteStatus, PointsCalculations, CreationLimits
+from db.enum_variables import InviteStatus, PointsCalculations, CreationLimits
 from sqlalchemy.ext.asyncio import AsyncSession
 
 class RoomService:
@@ -38,7 +38,7 @@ class RoomService:
         room_count_user_2 = await self.room_repository.get_user_rooms_count(user_id_2)
 
         if room_count_user_1 >= CreationLimits.ACTIVE_ROOM_MAX.value or room_count_user_2 >= CreationLimits.ACTIVE_ROOM_MAX.value:
-            raise HTTPException(status_code=400, detail="User can`t have more than 20 rooms")
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="User can`t have more than 20 rooms")
 
     async def create_room(self, room_info: RoomBase, creator_id: UUID, visitor_id: UUID):
         await self.room_limitation(creator_id, visitor_id)
@@ -47,7 +47,7 @@ class RoomService:
         try:
             created_room = await self.room_repository.create(db_room)
         except IntegrityError as e:
-            raise HTTPException(status_code=400, detail="Room creation failed.")
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Room creation failed.")
         return created_room
     
     async def check_room(self, room_id: UUID, user_id: UUID):
@@ -92,9 +92,9 @@ class RoomService:
     #HABBIT|PET LOGIC
     async def create_habbits(self, room_id: UUID, habbits: list[HabbitBase]):
         if len(habbits) < CreationLimits.HABBIT_MIN.value:
-            raise HTTPException(status_code=400, detail="Should be at least one habbit.")
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Should be at least one habbit.")
         elif len(habbits) > CreationLimits.HABBIT_MAX.value:
-            raise HTTPException(status_code=400, detail="Should be less than five habbits.")
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Should be less than five habbits.")
         
         habbit_list = []
         max_hp = 0
@@ -124,7 +124,7 @@ class RoomService:
         try:
             created_pet = await self.pet_repository.create(db_pet)
         except IntegrityError as e:
-            raise HTTPException(status_code=400, detail="Pet creation failed.")
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Pet creation failed.")
         return created_pet
     
     async def check_pet(self, pet_id: UUID):
@@ -164,11 +164,11 @@ class RoomService:
             pet = await self.pet_repository.get_pet_by_room(habbit.room_id)
             added_points = await self.progress_repository.get_point_value(habbit_id)
             if added_points is None:
-                raise HTTPException(status_code=400, detail="Points adding went wrong.")
+                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Points adding went wrong.")
             await self.progress_repository.create(db_progress)
             await self.update_pet_points(pet, pet.current_hp + added_points)
         except IntegrityError as e:
-            raise HTTPException(status_code=400, detail="Progress creation failed.")
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Progress creation failed.")
         return {"message": "Habbit checked"}
     
     async def get_room_progress(self, room_id: UUID, user_id: UUID):

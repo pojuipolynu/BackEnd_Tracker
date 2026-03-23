@@ -1,7 +1,7 @@
 from repository.base_repository import BaseRepository
 from db.models import Habbit, Point
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, or_, insert, func
+from sqlalchemy import select, insert, func
 from uuid import UUID
 
 class HabbitRepository(BaseRepository):

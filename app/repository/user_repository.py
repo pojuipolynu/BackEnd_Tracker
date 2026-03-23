@@ -1,5 +1,5 @@
 from repository.base_repository import BaseRepository
-from db.models import User, Friend, Request
+from db.models import User, Friend
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, or_
 from uuid import UUID
@@ -60,3 +60,11 @@ class UserRepository(BaseRepository):
     async def get_users_username(self, username_key: str):
         result = await self.db.execute(select(self.model).where(self.model.username.ilike(f"%{username_key}%")))
         return result.scalars().all()
+    
+    async def get_search_users(self, user_id: UUID, offset: int, limit: int):
+        if limit == 0:
+            result = await self.db.execute(select(self.model).filter(self.model.id != user_id).offset(offset))
+        else:
+            result = await self.db.execute(select(self.model).filter(self.model.id != user_id).offset(offset).limit(limit))
+        variables = result.scalars().all()
+        return variables

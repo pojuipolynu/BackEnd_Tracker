@@ -1,9 +1,9 @@
 from repository.base_repository import BaseRepository
 from db.models import Pet, Room
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, or_, update
+from sqlalchemy import select, update
 from uuid import UUID
-from  db.enum_variables import InviteStatus
+from db.enum_variables import InviteStatus
 
 class PetRepository(BaseRepository):
     def __init__(self, db: AsyncSession):

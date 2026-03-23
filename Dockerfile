@@ -11,10 +11,4 @@ ENV PYTHONPATH=/app/app
 
 EXPOSE 8000
 
-CMD sh -c "sleep 5 && alembic upgrade head && (python app/main.py & celery -A app.celery_app:celery_app worker --loglevel=info & celery -A app.celery_app:celery_app beat --loglevel=info)"
-
-# CMD python main.py & alembic upgrade head & celery -A celery_app worker --loglevel=info --beat
-
-# CMD python app/main.py
-
-# CMD sh -c "sleep 5 && alembic upgrade head && (python app/main.py & celery -A app.celery_app:celery_app worker --loglevel=info & celery -A app.celery_app:celery_app beat --loglevel=info)"
+CMD sh -c "sleep 5 && alembic upgrade head && (python app/main.py & celery -A celery -A app.celery_app:celery_app worker --loglevel=info -P solo & celery -A app.celery_app:celery_app beat --loglevel=info)"

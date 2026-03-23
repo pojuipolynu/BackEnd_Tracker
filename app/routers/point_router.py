@@ -16,5 +16,5 @@ async def get_point_by_id(point_id:UUID, point_service: PointService = Depends(g
     return await point_service.get_point_by_id(point_id)
 
 @router.post("/create", response_model=Point, status_code=status.HTTP_201_CREATED)
-async def create_point(point_value: int, point_service: PointService = Depends(get_point_service), current_user=Depends(AuthorizationService.get_current_user)):
-    return await point_service.create_point(point_value)
+async def create_point(dev_password: str, point_value: int, point_service: PointService = Depends(get_point_service), current_user=Depends(AuthorizationService.get_current_user)):
+    return await point_service.create_point(dev_password, point_value)

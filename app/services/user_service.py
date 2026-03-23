@@ -1,14 +1,14 @@
-from  db.models import User, Friend, Request
-from  schemas.user_schema import UserCreate, UserUpdateRequest, SignInRequest
-from  repository.user_repository import UserRepository
-from  repository.request_repository import RequestRepository
-from  repository.friend_repository import FriendRepository
+from db.models import User, Friend, Request
+from schemas.user_schema import UserCreate, UserUpdateRequest, SignInRequest
+from repository.user_repository import UserRepository
+from repository.request_repository import RequestRepository
+from repository.friend_repository import FriendRepository
 from uuid import UUID
 from fastapi import HTTPException, status
-from  schemas.user_schema import UserCreate
+from schemas.user_schema import UserCreate
 from sqlalchemy.ext.asyncio import AsyncSession
 import bcrypt
-from  db.enum_variables import InviteStatus
+from db.enum_variables import InviteStatus
 
 class UserService:
     def __init__(self, db: AsyncSession, user_repository: UserRepository):
@@ -28,8 +28,8 @@ class UserService:
             hashed_password.encode('utf-8')
         )
 
-    async def get_users(self, offset: int = 0, limit: int = 100):
-        users = await self.user_repository.get_all(offset, limit)
+    async def get_users(self, user_id: UUID, offset: int = 0, limit: int = 100):
+        users = await self.user_repository.get_search_users(user_id, offset, limit)
         return {"users": list(users)}
     
     async def get_users_by_username(self, username_key: str):

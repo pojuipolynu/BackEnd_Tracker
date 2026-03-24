@@ -1,5 +1,6 @@
 from db.models import User, Friend, Request
 from schemas.user_schema import UserCreate, UserUpdateRequest, SignInRequest
+from schemas.request_schema import RequestUpdateRequest
 from repository.user_repository import UserRepository
 from repository.request_repository import RequestRepository
 from repository.friend_repository import FriendRepository
@@ -144,6 +145,6 @@ class UserService:
             await self.friend_repository.create(Friend(user_1_id=request.creator_id, user_2_id=request.user_id))
             await self.request_repository.delete(request)
         else:
-            await self.request_repository.update(request, request_status)
+            await self.request_repository.update(request, RequestUpdateRequest(**{"status":request_status}))
 
         return {"message": "Request updated"}

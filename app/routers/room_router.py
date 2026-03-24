@@ -81,13 +81,13 @@ async def get_habbits(room_id: UUID, room_service: RoomService = Depends(get_roo
 """
 РУТИ ФУНКЦІОНАЛУ ТАСОК СЕЛЕРІ ДЛЯ ПЕРЕВІРКИ РОБОТИ ФУНКЦІЙ
 """
-@router.get("/reduce_hp", status_code=status.HTTP_201_CREATED)
-async def test_reduce_hp(room_service: RoomService = Depends(get_room_service), current_user=Depends(AuthorizationService.get_current_user)):
-    return await room_service.apply_daily_pet_reduce()
+# @router.get("/reduce_hp", status_code=status.HTTP_201_CREATED)
+# async def test_reduce_hp(room_service: RoomService = Depends(get_room_service), current_user=Depends(AuthorizationService.get_current_user)):
+#     return await room_service.apply_daily_pet_reduce()
 
-@router.get("/clean_progress", status_code=status.HTTP_201_CREATED)
-async def test_clean_progress(room_service: RoomService = Depends(get_room_service), current_user=Depends(AuthorizationService.get_current_user)):
-    return await room_service.reset_weekly_progress()
+# @router.get("/clean_progress", status_code=status.HTTP_201_CREATED)
+# async def test_clean_progress(room_service: RoomService = Depends(get_room_service), current_user=Depends(AuthorizationService.get_current_user)):
+#     return await room_service.reset_weekly_progress()
 """
 РУТИ ФУНКЦІОНАЛУ ТАСОК СЕЛЕРІ ДЛЯ ПЕРЕВІРКИ РОБОТИ ФУНКЦІЙ
 """

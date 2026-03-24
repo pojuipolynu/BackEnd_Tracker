@@ -145,7 +145,8 @@ class RoomService:
         return {"message": "Pet points updated"}
     
     async def kill_pet(self, pet):
-        await self.pet_repository.update(pet, PetUpdateStatus(**{"is_dead": True}))
+        await self.pet_repository.update(pet, PetUpdateStatus(**{"current_hp": 0, "is_dead": True}))
+
         room = await self.room_repository.get_one(pet.room_id)
         if room is None:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Room not found")
